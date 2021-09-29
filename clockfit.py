@@ -53,7 +53,7 @@ for b in bl:
         p = subprocess.Popen('grep adjusted temp.txt | cut -d " " -f 9',shell=True, 
        	     stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
         epoch = np.asarray(p.stdout.read().split(),float)
-        model = least_squares(linear_model_res,[1,1],args=(epoch,delay))
+        model = least_squares(linear_model_res,[1,1],args=(epoch,delay),loss='cauchy')
     print('Baseline {}{} with pol {} rate={:>+10.4E} us/s'.format(ref,b,pol,model.x[0]))
     delay_m = epoch*model.x[0] + model.x[1]
     plt.close(1)
