@@ -38,8 +38,8 @@ if not os.path.exists(path): sys.exit('{} does not exist, did you run difx2mark4
 if not pol in ('R','L'): sys.exit('Polarisation must be either R or L, you had {}'.format(pol))
 
 for b in bl:
-    os.system('fourfit -t -b {0:}{1:} -m 0 -P {2:}{2:} {3:}No* set pc_mode manual > \
-        temp.txt 2>&1'.format(ref,b,pol,path))
+    os.system('fourfit -t -b {0:} -m 0 -P {1:}{1:} {2:}No* set pc_mode manual > \
+        temp.txt 2>&1'.format("".join(sorted(ref+b,key=str.casefold)),pol,path))
     try:
         p = subprocess.Popen('grep single temp.txt | cut -d ":" -f 3',shell=True,
              stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
@@ -54,7 +54,7 @@ for b in bl:
        	     stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
         epoch = np.asarray(p.stdout.read().split(),float)
         model = least_squares(linear_model_res,[1,1],args=(epoch,delay),loss='cauchy')
-    print('Baseline {}{} with pol {} rate={:>+10.4E} us/s'.format(ref,b,pol,model.x[0]))
+    print('Baseline {0:} with pol {1:}{1:} rate={2:>+10.4E} us/s'.format("".join(sorted(ref+b,key=str.casefold)),pol,model.x[0]))
     delay_m = epoch*model.x[0] + model.x[1]
     plt.close(1)
     fig = plt.figure(1,figsize=(5,10))
@@ -69,7 +69,7 @@ for b in bl:
     ax2.set_ylim(-25,25)
     ax2.set_xlabel('MJ Time (s)')
     ax2.set_ylabel('Delay residuals (ns)')
-    fig.savefig('{0:}../clocks{1:}{2:}{3:}{3:}.pdf'.format(path,ref,b,pol),bbox_inches='tight')
+    fig.savefig('{0:}../clocks{1:}{2:}{2:}.pdf'.format(path,"".join(sorted(ref+b,key=str.casefold)),pol),bbox_inches='tight')
 
 os.remove('temp.txt')
 
