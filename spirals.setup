@@ -1,18 +1,20 @@
-*------------------------------------------------------------------------------
 $MODE;
 *
 def spirals.meth;
      ref $PROCEDURES = Mode_01;
      ref $FREQ = 6596.00MHz16x16MHz:Cd:Ho;
      ref $FREQ = 6596.00MHz16x16MHz#2:Wa;
-     ref $FREQ = 6580.00MHz2x4x32MHz:Ke:Hb;
+     ref $FREQ = 6580.00MHz2x4x32MHz:Hb;
+     ref $FREQ = 6580.00MHz2x2x64MHz:Ke;
      ref $IF = LO@7300MHzDPolNoTone:Cd;
      ref $IF = LO@7000MHzDPolNoTone:Ho;
      ref $IF = LO@6000MHzDPolNoTone:Hb:Ke;
      ref $IF = LO@5900MHzDPolNoTone:Wa;
      ref $BBC = 8BBCs:Hb:Ke:Cd:Ho:Wa;
+     ref $BBC = 4BBCs:Ke;
      ref $TRACKS = VDIF.16Ch2bit:Cd:Ho:Wa;
      ref $TRACKS = VDIF.2x4Ch2bit:Ke:Hb;
+     ref $TRACKS = VDIF.2x2Ch2bit:Ke;
      ref $ROLL = NoRoll:Cd:Ho:Hb:Wa:Ke;
      ref $PHASE_CAL_DETECT = NoDetect:Cd:Ho:Hb:Wa:Ke;
 enddef;
@@ -234,6 +236,17 @@ def 6580.00MHz2x4x32MHz;
     chan_def =  :  6644.00 MHz : U :  32.000 MHz : &CH07 : &BBC07 : &NoCal;
     chan_def =  :  6676.00 MHz : U :  32.000 MHz : &CH08 : &BBC08 : &NoCal;
 enddef;
+*
+def 6580.00MHz2x2x64MHz;
+* mode =  1    stations =Ke
+    sample_rate =   128.000 Ms/sec;  * (2bits/sample)
+**  First datastream, C-band, X-pol
+    chan_def =  :  6580.00 MHz : U :  64.000 MHz : &CH01 : &BBC01 : &NoCal;
+    chan_def =  :  6644.00 MHz : U :  64.000 MHz : &CH02 : &BBC02 : &NoCal;
+**  Second datastream, C-band, Y-pol
+    chan_def =  :  6580.00 MHz : U :  64.000 MHz : &CH03 : &BBC03 : &NoCal;
+    chan_def =  :  6644.00 MHz : U :  64.000 MHz : &CH04 : &BBC04 : &NoCal;
+enddef;
 *------------------------------------------------------------------------------
 $IF;
 *
@@ -264,7 +277,7 @@ enddef;
 $BBC;
 *
 def 8BBCs;
-* mode =  1    stations =Cd:Ho:Wa:Hb:Ke
+* mode =  1    stations =Cd:Ho:Wa:Hb
      BBC_assign = &BBC01 :  1 : &IF_A;
      BBC_assign = &BBC02 :  2 : &IF_A;
      BBC_assign = &BBC03 :  3 : &IF_A;
@@ -273,6 +286,14 @@ def 8BBCs;
      BBC_assign = &BBC06 :  6 : &IF_B;
      BBC_assign = &BBC07 :  7 : &IF_B;
      BBC_assign = &BBC08 :  8 : &IF_B;
+enddef;
+*
+def 4BBCs;
+* mode =  1    stations =Ke
+     BBC_assign = &BBC01 :  1 : &IF_A;
+     BBC_assign = &BBC02 :  2 : &IF_A;
+     BBC_assign = &BBC03 :  3 : &IF_B;
+     BBC_assign = &BBC04 :  4 : &IF_B;
 enddef;
 *
 *------------------------------------------------------------------------------
@@ -285,8 +306,21 @@ enddef;
 *------------------------------------------------------------------------------
 $TRACKS;
 *
+def VDIF.2x2Ch2bit;
+* mode =  1 stations =Ke
+  track_frame_format = VDIF/8032/2;
+  fanout_def = A : &CH01 : sign : 1 : 00;
+  fanout_def = A : &CH01 : mag  : 1 : 01;
+  fanout_def = A : &CH02 : sign : 1 : 02;
+  fanout_def = A : &CH02 : mag  : 1 : 03;
+  fanout_def = A : &CH03 : sign : 1 : 04;
+  fanout_def = A : &CH03 : mag  : 1 : 05;
+  fanout_def = A : &CH04 : sign : 1 : 06;
+  fanout_def = A : &CH04 : mag  : 1 : 07;
+enddef;
+*
 def VDIF.2x4Ch2bit;
-* mode =  1 stations =Hb:Ke
+* mode =  1 stations =Hb
   track_frame_format = VDIF/8032/2;
   fanout_def = A : &CH01 : sign : 1 : 00;
   fanout_def = A : &CH01 : mag  : 1 : 01;

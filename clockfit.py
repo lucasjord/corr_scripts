@@ -33,7 +33,8 @@ exper = sys.argv[1]
 ref   = sys.argv[2]
 pol   = sys.argv[3]
 bl    = sys.argv[4:]
-path  = '/home/observer/correlations2/{}/1234/'.format(exper)
+#path  = '/home/observer/correlations2/{}/1234/'.format(exper)
+path = './1234/'
 if not os.path.exists(path): sys.exit('{} does not exist, did you run difx2mark4?'.format(path))
 if not pol in ('R','L'): sys.exit('Polarisation must be either R or L, you had {}'.format(pol))
 
@@ -60,7 +61,7 @@ for b in bl:
     fig = plt.figure(1,figsize=(5,10))
     ax1 = fig.add_subplot(211)
     ax1.plot(epoch,1000*delay,'k--.',lw=0.75,zorder=99)
-    ax1.plot(epoch,1000*delaym1,'r-',zorder=98)
+    ax1.plot(epoch,1000*delay_m,'r-',zorder=98)
     ax1.set_xlabel('')
     ax1.set_ylim(np.percentile(delay,50)*1000-50,np.percentile(delay,50)*1000+50)
     ax1.set_ylabel('Delay (ns)')

@@ -1,19 +1,20 @@
-*------------------------------------------------------------------------------
 $MODE;
 *
 def spirals.meth;
      ref $PROCEDURES = Mode_01;
      ref $FREQ = 6596.00MHz16x16MHz:Cd:Ho;
      ref $FREQ = 6596.00MHz16x16MHz#2:Wa;
-     ref $FREQ = 6580.00MHz2x4x32MHz:Ke:Hb;
+     ref $FREQ = 6580.00MHz2x4x32MHz:Hb;
+     ref $FREQ = 6580.00MHz2x2x64MHz:Ke;
      ref $IF = LO@7300MHzDPolNoTone:Cd;
      ref $IF = LO@7000MHzDPolNoTone:Ho;
      ref $IF = LO@6000MHzDPolNoTone:Hb:Ke;
      ref $IF = LO@5900MHzDPolNoTone:Wa;
      ref $BBC = 8BBCs:Hb:Ke:Cd:Ho:Wa;
-     ref $TRACKS = MARK5B.16Ch2bit1to1:Cd:Ho;
-     ref $TRACKS = VDIF.16Ch2bit:Wa;
+     ref $BBC = 4BBCs:Ke;
+     ref $TRACKS = VDIF.16Ch2bit:Cd:Ho:Wa;
      ref $TRACKS = VDIF.2x4Ch2bit:Ke:Hb;
+     ref $TRACKS = VDIF.2x2Ch2bit:Ke;
      ref $ROLL = NoRoll:Cd:Ho:Hb:Wa:Ke;
      ref $PHASE_CAL_DETECT = NoDetect:Cd:Ho:Hb:Wa:Ke;
 enddef;
@@ -23,13 +24,13 @@ $STATION;
 def Cd;
      ref $SITE = CEDUNA;
      ref $ANTENNA = CEDUNA;
-     ref $DAS = 1DBBC+NONE<;
+     ref $DAS = VDIF;
 enddef;
 *
 def Ho;
      ref $SITE = HOBART26;
      ref $ANTENNA = HOBART26;
-     ref $DAS = 2DBBC+MARK5B<;
+     ref $DAS = VDIF;
 enddef;
 *
 def Hb;
@@ -176,44 +177,28 @@ def VDIF;
      tape_motion = adaptive : 0 min: 0 min: 10 sec;
 enddef;
 *
-def 1DBBC+NONE<;
-     record_transport_type = Mark5B;
-     electronics_rack_type = DBBC;
-     number_drives = 1;
-     headstack = 1 :            : 0 ;
-     tape_motion = adaptive : 0 min: 0 min: 10 sec;
-enddef;
-*
-def 2DBBC+MARK5B<;
-     record_transport_type = Mark5B;
-     electronics_rack_type = DBBC;
-     number_drives = 2;
-     headstack = 1 :            : 0 ;
-     headstack = 2 :            : 1 ;
-     tape_motion = adaptive : 0 min: 0 min: 10 sec;
-enddef;
 *------------------------------------------------------------------------------
 $FREQ;
 *
 def 6596.00MHz16x16MHz;
 * mode =  1    stations =Cd:Ho
      sample_rate =    32.000 Ms/sec;  * (2bits/sample)
-     chan_def = :  6596.00 MHz : U :  16.00 MHz : &CH01 : &BBC01 : &NoCal; *Rcp
-     chan_def = :  6628.00 MHz : U :  16.00 MHz : &CH02 : &BBC02 : &NoCal; *Rcp
-     chan_def = :  6660.00 MHz : U :  16.00 MHz : &CH03 : &BBC03 : &NoCal; *Rcp
-     chan_def = :  6692.00 MHz : U :  16.00 MHz : &CH04 : &BBC04 : &NoCal; *Rcp
-     chan_def = :  6596.00 MHz : L :  16.00 MHz : &CH05 : &BBC01 : &NoCal; *Rcp
-     chan_def = :  6628.00 MHz : L :  16.00 MHz : &CH06 : &BBC02 : &NoCal; *Rcp
-     chan_def = :  6660.00 MHz : L :  16.00 MHz : &CH07 : &BBC03 : &NoCal; *Rcp
-     chan_def = :  6692.00 MHz : L :  16.00 MHz : &CH08 : &BBC04 : &NoCal; *Rcp
-     chan_def = :  6596.00 MHz : U :  16.00 MHz : &CH09 : &BBC05 : &NoCal; *Lcp
-     chan_def = :  6628.00 MHz : U :  16.00 MHz : &CH10 : &BBC06 : &NoCal; *Lcp
-     chan_def = :  6660.00 MHz : U :  16.00 MHz : &CH11 : &BBC07 : &NoCal; *Lcp
-     chan_def = :  6692.00 MHz : U :  16.00 MHz : &CH12 : &BBC08 : &NoCal; *Lcp
-     chan_def = :  6596.00 MHz : L :  16.00 MHz : &CH13 : &BBC05 : &NoCal; *Lcp
-     chan_def = :  6628.00 MHz : L :  16.00 MHz : &CH14 : &BBC06 : &NoCal; *Lcp
-     chan_def = :  6660.00 MHz : L :  16.00 MHz : &CH15 : &BBC07 : &NoCal; *Lcp
-     chan_def = :  6692.00 MHz : L :  16.00 MHz : &CH16 : &BBC08 : &NoCal; *Lcp
+     chan_def = :  6596.00 MHz : L :  16.00 MHz : &CH01 : &BBC01 : &NoCal;
+     chan_def = :  6628.00 MHz : L :  16.00 MHz : &CH02 : &BBC02 : &NoCal; 
+     chan_def = :  6660.00 MHz : L :  16.00 MHz : &CH03 : &BBC03 : &NoCal; 
+     chan_def = :  6692.00 MHz : L :  16.00 MHz : &CH04 : &BBC04 : &NoCal; 
+     chan_def = :  6596.00 MHz : L :  16.00 MHz : &CH05 : &BBC05 : &NoCal; 
+     chan_def = :  6628.00 MHz : L :  16.00 MHz : &CH06 : &BBC06 : &NoCal; 
+     chan_def = :  6660.00 MHz : L :  16.00 MHz : &CH07 : &BBC07 : &NoCal; 
+     chan_def = :  6692.00 MHz : L :  16.00 MHz : &CH08 : &BBC08 : &NoCal; 
+     chan_def = :  6596.00 MHz : U :  16.00 MHz : &CH09 : &BBC01 : &NoCal;
+     chan_def = :  6628.00 MHz : U :  16.00 MHz : &CH10 : &BBC02 : &NoCal; 
+     chan_def = :  6660.00 MHz : U :  16.00 MHz : &CH11 : &BBC03 : &NoCal; 
+     chan_def = :  6692.00 MHz : U :  16.00 MHz : &CH12 : &BBC04 : &NoCal; 
+     chan_def = :  6596.00 MHz : U :  16.00 MHz : &CH13 : &BBC05 : &NoCal; 
+     chan_def = :  6628.00 MHz : U :  16.00 MHz : &CH14 : &BBC06 : &NoCal; 
+     chan_def = :  6660.00 MHz : U :  16.00 MHz : &CH15 : &BBC07 : &NoCal; 
+     chan_def = :  6692.00 MHz : U :  16.00 MHz : &CH16 : &BBC08 : &NoCal;
 enddef;
 *
 def 6596.00MHz16x16MHz#2;
@@ -251,6 +236,17 @@ def 6580.00MHz2x4x32MHz;
     chan_def =  :  6644.00 MHz : U :  32.000 MHz : &CH07 : &BBC07 : &NoCal;
     chan_def =  :  6676.00 MHz : U :  32.000 MHz : &CH08 : &BBC08 : &NoCal;
 enddef;
+*
+def 6580.00MHz2x2x64MHz;
+* mode =  1    stations =Ke
+    sample_rate =   128.000 Ms/sec;  * (2bits/sample)
+**  First datastream, C-band, X-pol
+    chan_def =  :  6580.00 MHz : U :  64.000 MHz : &CH01 : &BBC01 : &NoCal;
+    chan_def =  :  6644.00 MHz : U :  64.000 MHz : &CH02 : &BBC02 : &NoCal;
+**  Second datastream, C-band, Y-pol
+    chan_def =  :  6580.00 MHz : U :  64.000 MHz : &CH03 : &BBC03 : &NoCal;
+    chan_def =  :  6644.00 MHz : U :  64.000 MHz : &CH04 : &BBC04 : &NoCal;
+enddef;
 *------------------------------------------------------------------------------
 $IF;
 *
@@ -281,7 +277,7 @@ enddef;
 $BBC;
 *
 def 8BBCs;
-* mode =  1    stations =Cd:Ho:Wa:Hb:Ke
+* mode =  1    stations =Cd:Ho:Wa:Hb
      BBC_assign = &BBC01 :  1 : &IF_A;
      BBC_assign = &BBC02 :  2 : &IF_A;
      BBC_assign = &BBC03 :  3 : &IF_A;
@@ -290,6 +286,14 @@ def 8BBCs;
      BBC_assign = &BBC06 :  6 : &IF_B;
      BBC_assign = &BBC07 :  7 : &IF_B;
      BBC_assign = &BBC08 :  8 : &IF_B;
+enddef;
+*
+def 4BBCs;
+* mode =  1    stations =Ke
+     BBC_assign = &BBC01 :  1 : &IF_A;
+     BBC_assign = &BBC02 :  2 : &IF_A;
+     BBC_assign = &BBC03 :  3 : &IF_B;
+     BBC_assign = &BBC04 :  4 : &IF_B;
 enddef;
 *
 *------------------------------------------------------------------------------
@@ -302,8 +306,21 @@ enddef;
 *------------------------------------------------------------------------------
 $TRACKS;
 *
+def VDIF.2x2Ch2bit;
+* mode =  1 stations =Ke
+  track_frame_format = VDIF/8032/2;
+  fanout_def = A : &CH01 : sign : 1 : 00;
+  fanout_def = A : &CH01 : mag  : 1 : 01;
+  fanout_def = A : &CH02 : sign : 1 : 02;
+  fanout_def = A : &CH02 : mag  : 1 : 03;
+  fanout_def = A : &CH03 : sign : 1 : 04;
+  fanout_def = A : &CH03 : mag  : 1 : 05;
+  fanout_def = A : &CH04 : sign : 1 : 06;
+  fanout_def = A : &CH04 : mag  : 1 : 07;
+enddef;
+*
 def VDIF.2x4Ch2bit;
-* mode =  1 stations =Hb:Ke
+* mode =  1 stations =Hb
   track_frame_format = VDIF/8032/2;
   fanout_def = A : &CH01 : sign : 1 : 00;
   fanout_def = A : &CH01 : mag  : 1 : 01;
@@ -324,80 +341,40 @@ def VDIF.2x4Ch2bit;
 enddef;
 *
 def VDIF.16Ch2bit;
-* mode =  1 stations =Wa
+* mode =  1 stations =Wa:Ho:Cd
   track_frame_format = VDIF/8032/2;
-  fanout_def = A : &CH13 : sign : 1 : 00;
-  fanout_def = A : &CH13 : mag  : 1 : 01;
-  fanout_def = A : &CH14 : sign : 1 : 02;
-  fanout_def = A : &CH14 : mag  : 1 : 03;
-  fanout_def = A : &CH15 : sign : 1 : 04;
-  fanout_def = A : &CH15 : mag  : 1 : 05;
-  fanout_def = A : &CH16 : sign : 1 : 06;
-  fanout_def = A : &CH16 : mag  : 1 : 07;
-  fanout_def = A : &CH09 : sign : 1 : 08;
-  fanout_def = A : &CH09 : mag  : 1 : 09;
-  fanout_def = A : &CH10 : sign : 1 : 10;
-  fanout_def = A : &CH10 : mag  : 1 : 11;
-  fanout_def = A : &CH11 : sign : 1 : 12;
-  fanout_def = A : &CH11 : mag  : 1 : 13;
-  fanout_def = A : &CH12 : sign : 1 : 14;
-  fanout_def = A : &CH12 : mag  : 1 : 15;
-  fanout_def = A : &CH05 : sign : 1 : 16;
-  fanout_def = A : &CH05 : mag  : 1 : 17;
-  fanout_def = A : &CH06 : sign : 1 : 18;
-  fanout_def = A : &CH06 : mag  : 1 : 19;
-  fanout_def = A : &CH07 : sign : 1 : 20;
-  fanout_def = A : &CH07 : mag  : 1 : 21;
-  fanout_def = A : &CH08 : sign : 1 : 22;
-  fanout_def = A : &CH08 : mag  : 1 : 23;
-  fanout_def = A : &CH01 : sign : 1 : 24;
-  fanout_def = A : &CH01 : mag  : 1 : 25;
-  fanout_def = A : &CH02 : sign : 1 : 26;
-  fanout_def = A : &CH02 : mag  : 1 : 27;
-  fanout_def = A : &CH03 : sign : 1 : 28;
-  fanout_def = A : &CH03 : mag  : 1 : 29;
-  fanout_def = A : &CH04 : sign : 1 : 30;
-  fanout_def = A : &CH04 : mag  : 1 : 31;
-enddef;
-*
-def MARK5B.16Ch2bit1to1;
-* mode =  1    stations =Cd:Ho
-*    firmware_type = DBBC_DDC;
-*    format = MARK5B, and fan-out = 1
-*    mode requires  32.00Mb/s/tr; stations using disks
-     track_frame_format = MARK5B;
-     fanout_def =   : &CH01 : sign : 1: 18;
-     fanout_def =   : &CH01 :  mag : 1: 19;
-     fanout_def =   : &CH02 : sign : 1: 20;
-     fanout_def =   : &CH02 :  mag : 1: 21;
-     fanout_def =   : &CH03 : sign : 1: 22;
-     fanout_def =   : &CH03 :  mag : 1: 23;
-     fanout_def =   : &CH04 : sign : 1: 24;
-     fanout_def =   : &CH04 :  mag : 1: 25;
-     fanout_def =   : &CH05 : sign : 1:  2;
-     fanout_def =   : &CH05 :  mag : 1:  3;
-     fanout_def =   : &CH06 : sign : 1:  4;
-     fanout_def =   : &CH06 :  mag : 1:  5;
-     fanout_def =   : &CH07 : sign : 1:  6;
-     fanout_def =   : &CH07 :  mag : 1:  7;
-     fanout_def =   : &CH08 : sign : 1:  8;
-     fanout_def =   : &CH08 :  mag : 1:  9;
-     fanout_def =   : &CH09 : sign : 1: 26;
-     fanout_def =   : &CH09 :  mag : 1: 27;
-     fanout_def =   : &CH10 : sign : 1: 28;
-     fanout_def =   : &CH10 :  mag : 1: 29;
-     fanout_def =   : &CH11 : sign : 1: 30;
-     fanout_def =   : &CH11 :  mag : 1: 31;
-     fanout_def =   : &CH12 : sign : 1: 32;
-     fanout_def =   : &CH12 :  mag : 1: 33;
-     fanout_def =   : &CH13 : sign : 1: 10;
-     fanout_def =   : &CH13 :  mag : 1: 11;
-     fanout_def =   : &CH14 : sign : 1: 12;
-     fanout_def =   : &CH14 :  mag : 1: 13;
-     fanout_def =   : &CH15 : sign : 1: 14;
-     fanout_def =   : &CH15 :  mag : 1: 15;
-     fanout_def =   : &CH16 : sign : 1: 16;
-     fanout_def =   : &CH16 :  mag : 1: 17;
+  fanout_def = A : &CH01 : sign : 1 : 00;
+  fanout_def = A : &CH01 : mag  : 1 : 01;
+  fanout_def = A : &CH02 : sign : 1 : 02;
+  fanout_def = A : &CH02 : mag  : 1 : 03;
+  fanout_def = A : &CH03 : sign : 1 : 04;
+  fanout_def = A : &CH03 : mag  : 1 : 05;
+  fanout_def = A : &CH04 : sign : 1 : 06;
+  fanout_def = A : &CH04 : mag  : 1 : 07;
+  fanout_def = A : &CH05 : sign : 1 : 08;
+  fanout_def = A : &CH05 : mag  : 1 : 09;
+  fanout_def = A : &CH06 : sign : 1 : 10;
+  fanout_def = A : &CH06 : mag  : 1 : 11;
+  fanout_def = A : &CH07 : sign : 1 : 12;
+  fanout_def = A : &CH07 : mag  : 1 : 13;
+  fanout_def = A : &CH08 : sign : 1 : 14;
+  fanout_def = A : &CH08 : mag  : 1 : 15;
+  fanout_def = A : &CH09 : sign : 1 : 16;
+  fanout_def = A : &CH09 : mag  : 1 : 17;
+  fanout_def = A : &CH10 : sign : 1 : 18;
+  fanout_def = A : &CH10 : mag  : 1 : 19;
+  fanout_def = A : &CH11 : sign : 1 : 20;
+  fanout_def = A : &CH11 : mag  : 1 : 21;
+  fanout_def = A : &CH12 : sign : 1 : 22;
+  fanout_def = A : &CH12 : mag  : 1 : 23;
+  fanout_def = A : &CH13 : sign : 1 : 24;
+  fanout_def = A : &CH13 : mag  : 1 : 25;
+  fanout_def = A : &CH14 : sign : 1 : 26;
+  fanout_def = A : &CH14 : mag  : 1 : 27;
+  fanout_def = A : &CH15 : sign : 1 : 28;
+  fanout_def = A : &CH15 : mag  : 1 : 29;
+  fanout_def = A : &CH16 : sign : 1 : 30;
+  fanout_def = A : &CH16 : mag  : 1 : 31;
 enddef;
 *
 *------------------------------------------------------------------------------

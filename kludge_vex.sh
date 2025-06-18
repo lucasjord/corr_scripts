@@ -14,8 +14,8 @@ n4=$(grep "\$SCHED\;" $1.vex -n | cut -d ":" -f 1)
 tail -$(expr $nT - $n4 + 1) $1.vex > $1.sched
 
 cat $1.header > $1.vex.kludge
-echo "Using VDIF setups"
-cat ~/correlations2/corr_scripts/spirals.setup >> $1.vex.kludge
+echo "Using VDIF spirals 3 setups"
+cat ~/correlations2/corr_scripts/spirals3.setup >> $1.vex.kludge
 cat $1.sources >> $1.vex.kludge
 cat $1.sched >> $1.vex.kludge
 
