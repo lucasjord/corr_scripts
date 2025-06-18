@@ -1,0 +1,144 @@
+mjdStart     = FAKESTART
+mjdStop      = FAKESTOP
+
+minLength    = 0.9
+maxLength    = 3600.0
+
+minSubarray  = 3
+
+tweakIntTime = True
+singleScan   = True
+minReadSize  =  16000000
+maxReadSize  = 256000000
+
+#################################
+# PASS 1
+#################################
+
+SETUP lowres
+{
+    guardNS    = 26000
+    FFTSpecRes = 0.001953125
+    # +/-2us window
+    specRes    = 0.25
+    tInt       = 2.048
+}
+
+#################################
+# PASS 2
+#################################
+
+SETUP highres
+{
+    FFTSpecRes = 0.001953125
+    # vel res 0.09 km/s @ 6.7GHz
+    specRes    = 0.001953125
+    tInt       = 2.048
+    freqIds    = 3
+}
+
+#################################
+
+RULE correlate
+{
+ setup = lowres
+ source=FAKEFF
+ source=FAKESOURCE
+}
+
+RULE geo
+{
+  setup = SKIP
+}
+
+#################################
+
+vex=FAKEVEX.vex.kludge
+exhaustiveAutocorrs=True
+antennas=Cd,Hb,Ke,Wa,Yg
+
+#################################
+
+ZOOM zoom1 {
+    addZoomFreq = freq@6666.5/bw@4.00
+}
+
+ZOOM zoom32 {
+    addZoomFreq = freq@6580.00/bw@32.00
+    addZoomFreq = freq@6612.00/bw@32.00
+    addZoomFreq = freq@6644.00/bw@32.00
+    addZoomFreq = freq@6676.00/bw@32.00
+}
+
+#################################
+ANTENNA Cd {
+ format      = VDIF/8032/2
+ filelist    = cd.filelist
+ FAKECLOCKS_cd
+ deltaClock  = 0.0
+ polSwap     = True
+# zoom = zoom1
+}
+#################################
+ANTENNA Hb {
+ datastreams = XHb, YHb
+ FAKECLOCKS_hb
+ deltaClock  = 0.0
+# zoom = zoom1
+}
+DATASTREAM XHb {
+    format   = VDIF/8032/2
+    nBand    = 2
+    filelist = hbX.filelist
+}
+DATASTREAM YHb {
+    format   = VDIF/8032/2
+    nBand    = 2
+    filelist = hbY.filelist
+}
+#################################
+ANTENNA Ke {
+ datastreams = XKe, YKe
+ FAKECLOCKS_ke
+ deltaClock  = 0.0
+# zoom = zoom1
+}
+DATASTREAM XKe {
+    format   = VDIF/8032/2
+    nBand    = 2
+    filelist = keX.filelist
+}
+DATASTREAM YKe {
+    format   = VDIF/8032/2
+    nBand    = 2
+    filelist = keY.filelist
+}
+#################################
+ANTENNA Wa {
+ format      = VDIF/8032/2
+ FAKECLOCKS_wa
+ filelist    = wa.filelist
+ deltaClock  = 0.0
+ polSwap     = True
+# zoom = zoom1
+}
+#################################
+ANTENNA Yg {
+ datastreams = XYg, YYg
+ FAKECLOCKS_yg
+ deltaClock  = 0.0
+# polSwap     = True
+# zoom = zoom1
+}
+DATASTREAM XYg {
+    format   = VDIF/8032/2
+    nBand    = 2
+    filelist = ygX.filelist
+}
+DATASTREAM YYg {
+    format   = VDIF/8032/2
+    nBand    = 2
+    filelist = ygY.filelist
+}
+#################################
+#EOPs

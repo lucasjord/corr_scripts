@@ -1,0 +1,206 @@
+#!/usr/bin/env python
+
+import os, numpy as np, argparse
+import matplotlib.pyplot as plt
+from parseDiFX import *
+from astropy.time import Time as aTime
+
+def get_file(path):
+    #opens and external file and makes it into a list
+    fopen = path
+    f=open(fopen, 'r+')
+    g=list(f)
+    g=map(lambda s: s.strip(), g)
+    return np.array(list(g))
+
+def splitt(old_list):
+    #splits the list entries into sublists
+    new_list=[]
+    for i in old_list:
+        new_list+=[i.split()]
+    return np.array(new_list)
+
+
+def main():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("experiment", help="Experiment code")
+    parser.add_argument("-n", "--number", help="DiFX output file number", type=str, default="1")
+    parser.add_argument("-o", "--output", help="Directory to put the fringe plots", default="/home/observer/fringe_plots/")
+
+    args = parser.parse_args()
+
+    direct    = '/home/observer/correlations2/{}/'.format(args.experiment)
+    inputfile = '/home/observer/correlations2/{0:}/{0:}_{1:}.input'.format(args.experiment,args.number)
+
+    plot_path = args.output
+
+    # deleting old files
+    os.system('rm '+plot_path+'baseline_*')
+
+    #try: os.remove(direct+'fringe/baseline_*')
+    #except OSError: pass
+
+    #os.system('mv {0:}baseline* {0:}fringe/'.format(direct))
+
+    (nfqs, fqs) = get_freqtable_info(inputfile)
+    (ntel, tel) = get_telescopetable_info(inputfile)
+    (ndts, dts) = get_datastreamtable_info(inputfile)
+    (nbls, bls) = get_baselinetable_info(inputfile)
+
+    # setting fringe plot time
+    mjd0,mjd1=[int(s.split(':')[-1]) for s in get_file(inputfile) if 'START' in s]
+    time = aTime(mjd0+mjd1/86400.,format='mjd')
+    os.system('echo {} > {}/TIME'.format(time.yday,plot_path));
+
+    infiles = [s for s in os.listdir(direct+'fringe/') if 'baseline_' in s]
+    for b in range(nbls):
+        #check if same datastream
+        samedstr = dts[bls[b].dsaindex].telescopeindex==dts[bls[b].dsbindex].telescopeindex
+        if samedstr:
+            # make autocorrelation figure
+            fig, AX = plt.subplots(np.max(bls[b].freqpols),bls[b].nfreq,figsize=(1.5*2*bls[b].nfreq,np.max(2*bls[b].freqpols)))
+            # catch for misshapen AX array
+            if np.max(bls[b].freqpols)==1 or bls[b].nfreq==1:
+                AX = AX.reshape(np.max(bls[b].freqpols),bls[b].nfreq)
+            bw    = fqs[dts[bls[b].dsaindex].recfreqindex[0]].bandwidth
+            nchan = fqs[dts[bls[b].dsaindex].recfreqindex[0]].numchan
+            speca = fqs[dts[bls[b].dsaindex].recfreqindex[0]].specavg
+            dt    = speca*bw/(nchan)
+            V     = []
+            maxlag= 0
+            minlag= 0
+            delay = 0
+            for p in range(bls[b].freqpols[0]):  #iterating over products
+                maxamp =  0.1
+                minamp = -0.1
+                for f in range(bls[b].nfreq):    #iterating over IFS
+                    key = 'baseline_{}_freq_{}_product_{}_'.format(b,f,p)
+                    bfp = []  # time averaging
+                    for infile in infiles:
+                        # same baseline, freq and product, different time
+                        if infile[:28]==key[:28]:
+                            bfp.append(infile)
+                    data = []
+                    for g in bfp:
+                        data.append(np.array(splitt(get_file(direct+'fringe/'+g))).astype(float))
+                    d = np.asarray(data)
+                    d[:,:,2:][d[:,:,2:] ==0] = np.nan
+                    # averaging over time - may be problematic for large rate
+                    D = np.nanmean(d,axis=0)
+
+                    # making XPOL phases. Order seems consistent (e.g. RR,RL,LR,LL)
+                    if p==1 or p==2:
+                        xa = AX[p,f].twinx()
+                        xa.plot(dt*D[:,0],D[:,2],'g,',lw=0.5)
+                        xa.set_ylim([-np.pi,np.pi])
+                        xa.set_yticks([])
+                    elif bls[b].dsaindex!=bls[b].dsbindex:
+                        xa = AX[p,f].twinx()
+                        xa.plot(dt*D[:,0],D[:,2],'g,',lw=0.5)
+                        xa.set_ylim([-np.pi,np.pi])
+                        xa.set_yticks([])
+
+                    # setting max amplitude
+                    if maxamp<1.25*np.percentile(D[:,1],95):
+                        maxamp = 1.25*np.percentile(D[:,1],5)
+                    AX[p,f].plot(dt*D[:,0],D[:,1],'b-',lw=0.5)
+                    AX[p,f].set_yticks([])
+
+                    xmax = dt*(D[:,0].shape[0])
+                    AX[p,f].set_xlim([0,xmax])
+                    if bls[b].freqpols[f] > 1 and p!=bls[b].freqpols[f]-1:
+                        AX[p,f].set_xticks([])
+                    else:
+                        AX[p,f].set_xticks(np.arange(0,xmax+1,xmax/2))
+                        AX[p,0].set_xlabel('MHz')
+
+                for f in range(bls[b].nfreq):
+                    AX[p,f].set_ylim([minamp,maxamp])
+
+
+            AX[0,0].set_title('{}-{} {}:{}'.format(tel[dts[bls[b].dsaindex].telescopeindex].name,
+                                                   tel[dts[bls[b].dsbindex].telescopeindex].name,
+                                                   bls[b].dsaindex,bls[b].dsbindex))
+            fig.savefig(plot_path+'baseline_{}_{}_{}.png'.format(b,tel[dts[bls[b].dsaindex].telescopeindex].name,
+                    tel[dts[bls[b].dsbindex].telescopeindex].name),bbox_inches='tight');
+            plt.close('all')
+        else:
+            # make xcorrelation figure, has extra plot to the side for total fringe
+            fig, AX = plt.subplots(np.max(bls[b].freqpols),bls[b].nfreq+1,figsize=(3*bls[b].nfreq,2*np.max(bls[b].freqpols)))
+            # catch for misshapen AX array
+            if np.max(bls[b].freqpols)==1 or bls[b].nfreq==1:
+                AX = AX.reshape(np.max(bls[b].freqpols),bls[b].nfreq+1)
+            bw = fqs[dts[bls[b].dsaindex].recfreqindex[0]].bandwidth
+            nchan = fqs[dts[bls[b].dsaindex].recfreqindex[0]].numchan
+            speca = fqs[dts[bls[b].dsaindex].recfreqindex[0]].specavg
+            dt = speca*bw/nchan
+            V  = []
+            maxlag = 0
+            minlag = 0
+            delay  = 0
+            for p in range(bls[b].freqpols[f]): #iterating over products
+                for f in range(bls[b].nfreq):   #iterating over IFS
+                    key = 'baseline_{}_freq_{}_product_{}_'.format(b,f,p)
+                    bfp = [] # time averaging
+                    for infile in infiles:
+                        # same baseline, freq and product
+                        if infile[:28]==key[:28]:
+                            bfp.append(infile)
+                    data = []
+                    for g in bfp:
+                        data.append(np.array(splitt(get_file(direct+'fringe/'+g))).astype(float))
+                    d = np.asarray(data)
+                    d[:,:,2:][d[:,:,2:] ==0] = np.nan
+                    # need to average lags
+                    # but we really should fit a straight line
+                    vis = d[:,:,1]*np.exp(np.complex(0,1)*d[:,:,2])
+                    lag = np.fft.fftshift(np.fft.ifft(vis,axis=-1)) 
+
+                    Lag = np.nanmean(abs(lag),axis=0)
+                    V  += list(np.fft.fftshift(np.fft.fft(Lag)))
+
+                    D   = np.zeros(shape=(Lag.shape[0],3))
+                    D[:,0] = np.arange(0,Lag.shape[0],1)
+                    #dt  = bw/lag.shape[0] 
+                    t   = -1/(dt)*(D[:,0]/D[:,0].max()-0.5)
+                    AX[p,f].plot(t,np.nanmean(lag.real,axis=0),'g-',lw=0.5)
+                    AX[p,f].plot(t,np.nanmean(lag.imag,axis=0),'r-',lw=0.5)
+                    #AX[p,f].plot(t,Lag,'r-',lw=0.5)
+                    if abs(Lag).max()>maxlag:
+                        maxlag=abs(Lag).max()
+                        delay =t[abs(Lag).argmax()]
+                    #if lag.real.min()<minlag: minlag = lag.real.min()
+                    AX[p,f].set_yticks([])
+                    if bls[b].freqpols[f] > 1 and p!=bls[b].freqpols[f]-1:
+                        AX[p,f].set_xticks([])
+                    else:
+                        AX[p, 0].set_xlabel(R'$\mu$s')
+                        AX[p,-1].set_xlabel(R'$\mu$s')
+
+                # plotting total fringe
+                v = np.array(V).flatten()
+                L = np.fft.ifft(v)
+                T = -1/dt*(np.arange(0,v.shape[0],1)/float(v.shape[0])-0.5)
+                AX[p,-1].plot(T,L.real,'g--',T,L.imag,'r--',lw=0.5);
+                AX[p,-1].set_xlim(T[abs(L).argmax()]-0.5,T[abs(L).argmax()]+0.5)
+                AX[p,-1].set_yticks([]);
+                if bls[b].freqpols[f] > 1 and p!=bls[b].freqpols[f]-1:
+                    AX[p,-1].set_xticks([])
+                if p==0:
+                    AX[p,-1].set_title('Combined:')
+
+            AX[0,0].set_title('{}-{}: {:+4.2f}us'.format(tel[dts[bls[b].dsaindex].telescopeindex].name,
+                                tel[dts[bls[b].dsbindex].telescopeindex].name,delay))
+
+            fig.savefig(plot_path+'baseline_{}_{}_{}.png'.format(b,tel[dts[bls[b].dsaindex].telescopeindex].name,
+		tel[dts[bls[b].dsbindex].telescopeindex].name),bbox_inches='tight');
+            plt.close('all');
+
+##############################################
+
+if __name__=='__main__':
+    main()
+
+##############################################
+
