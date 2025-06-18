@@ -22,20 +22,26 @@ def get_remote_scans(fb,exper,tel):
         sys.exit('No remote scans for {} found on {}'.format(exper,fb))
     [tmp,n,tmp,tmp,tmp,tmp,tmp] = ret[:7]
     #print(ret)
-    try: scans = np.reshape(ret[7:],(int(n),8))[:,(3,7)]
-    except ValueError:
-        # probably missing bytes
-        scanss = []
-        roll_count = 0
-        for i in range(int(n)): # iterate over scans
-            if 'recovered' in ret[7:][roll_count:(roll_count+11)]
-
-    return scans
+    # old way before disks died and lost bytes
+    # scans = np.reshape(ret[7:],(int(n),8))[:,(3,7)]
+    scans = []
+    roll_count = 0
+    for i in range(int(n)): # iterate over scans
+        if 'recovered' in ret[7:][roll_count:(roll_count+11)]:
+            scans.append(ret[7:][roll_count:(roll_count+11)])
+            roll_count += 11
+        else: 
+            scans.append(ret[7:][roll_count:(roll_count+7)])
+            roll_count += 7
+    scanss = np.reshape(ret[7:],(int(n),8))[:,(3,7)]
+    #print(scanss)
+    return scanss
 
 def get_local_scans(exper,tel):
     ret = os.popen("ls -l /mnt/rd1/AUSTRAL/{0:}{1:}/{0:}_{1:}*".format(exper,tel)).read().split()
     if len(ret)==0:
-        sys.exit('No local scans for {} found'.format(exper))
+        print('No local scans for {} found'.format(exper))
+        return np.array([['0','']])
     scans = np.reshape(ret,(int(len(ret)/9.0),9))[:,(4,8)]
     return scans
 
@@ -60,7 +66,7 @@ def compare_scan_lists(rscans,lscans,tol):
              print('{:s} missing {:7.1f}MB ({:5.2f}%)'.format(rscans[i,1],dsize/1.e6,100*dsize/float(rscans[i,0])))
              incomplete.append(rscans[i,1])
     print('Remote {:15d} bytes'.format(rscans[:,0].astype(int).sum() ))
-    print('Locate {:15d} bytes'.format(lscans[:,0].astype(int).sum() ))
+    print('Local  {:15d} bytes'.format(lscans[:,0].astype(int).sum() ))
     print('Missing {:4.2f}%'.format(100*(1-lscans[:,0].astype(float).sum()/rscans[:,0].astype(float).sum())))
     return incomplete, missing
 
