@@ -26,15 +26,18 @@ def get_remote_scans(fb,exper,tel):
     # scans = np.reshape(ret[7:],(int(n),8))[:,(3,7)]
     scans = []
     roll_count = 0
+    indx = np.array([3,7])
     for i in range(int(n)): # iterate over scans
         if 'recovered' in ret[7:][roll_count:(roll_count+11)]:
-            scans.append(ret[7:][roll_count:(roll_count+11)])
+            #print(ret[7:][roll_count:(roll_count+11)][:8])
+            scans.append(ret[7:][roll_count:(roll_count+11)][:8])
             roll_count += 11
         else: 
-            scans.append(ret[7:][roll_count:(roll_count+7)])
-            roll_count += 7
-    scanss = np.reshape(ret[7:],(int(n),8))[:,(3,7)]
-    #print(scanss)
+            #print(ret[7:][roll_count:(roll_count+8)][:8])
+            scans.append(ret[7:][roll_count:(roll_count+ 8)][:8])
+            roll_count += 8
+    #sys.exit()
+    scanss = np.reshape(scans,(int(n),8))[:,(3,7)]
     return scanss
 
 def get_local_scans(exper,tel):
